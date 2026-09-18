@@ -1,4 +1,4 @@
-package edu.umg.programacion2.proyect0;
+package edu.umg.programacion2.proyecto;
 
 import edu.umg.programacion2.proyecto.ui.VentanaPrincipal;
 

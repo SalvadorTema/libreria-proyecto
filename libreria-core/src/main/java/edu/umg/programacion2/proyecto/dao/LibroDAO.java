@@ -39,19 +39,20 @@ public class LibroDAO {
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
-            while (rs.next()) {
-                Libro libro = new Libro(
-                        rs.getInt("id"),
-                        rs.getString("titulo"),
-                        rs.getString("autor"),
-                        rs.getString("categoria"),
-                        rs.getDouble("precio"),
-                        rs.getInt("existencias"),
-                        rs.getInt("anio_publicacion")
-                );
-                lista.add(libro);
-            }
+        	while (rs.next()) {
+        	    Libro libro = new Libro(
+        	            rs.getInt("id"),
+        	            rs.getString("titulo"),
+        	            rs.getString("autor"),
+        	            rs.getString("categoria"),
+        	            rs.getDouble("precio"),
+        	            rs.getInt("existencias"),
+        	            rs.getInt("anio_publicacion")
+        	    );
+        	    lista.add(libro);
+        	}
         }
+        
         return lista;
     }
 
