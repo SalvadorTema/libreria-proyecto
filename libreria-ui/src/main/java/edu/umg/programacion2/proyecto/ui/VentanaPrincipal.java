@@ -158,6 +158,19 @@ public class VentanaPrincipal extends JFrame {
         pnlBotones.add(btnActualizar);
         pnlBotones.add(btnEliminar);
         pnlBotones.add(btnLimpiar);
+     
+        //  BOTÓN DE RESUMEN 
+        JButton btnVerResumen = new JButton("Ver Resumen");
+        btnVerResumen.setBackground(new Color(103, 58, 183));
+        btnVerResumen.setForeground(Color.WHITE);
+        btnVerResumen.setFocusPainted(false);
+        btnVerResumen.setOpaque(true);
+        btnVerResumen.setBorderPainted(false);
+        btnVerResumen.setFont(new Font("SansSerif", Font.BOLD, 12));
+        
+        btnVerResumen.addActionListener(e -> mostrarResumen());
+        
+        pnlBotones.add(btnVerResumen);
 
         // 5. Panel de Búsqueda
         JPanel pnlBusqueda = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
@@ -400,4 +413,43 @@ public class VentanaPrincipal extends JFrame {
         txtFechaIngreso.setText(LocalDate.now().toString());
         tablaLibros.clearSelection();
     }
-}
+    private void mostrarResumen() {
+        try {
+            List<Libro> listaLibros = libroDAO.listarTodos();
+
+            int totalRegistros = listaLibros.size();
+            int contadorCondicion = 0; // Contador manual en Java
+
+            for (Libro libro : listaLibros) {
+                if (libro.getExistencias() > 0) { // Condición: existencias en inventario mayores a 0
+                    contadorCondicion++;
+                }
+            }
+
+            String mensaje = String.format(
+                "=== RESUMEN DEL CATÁLOGO ===\n\n" +
+                "• Total de registros cargados: %d\n" +
+                "• Libros con existencias en inventario (> 0): %d\n" +
+                "• Libros agotados (= 0): %d",
+                totalRegistros, contadorCondicion, (totalRegistros - contadorCondicion)
+            );
+
+            JOptionPane.showMessageDialog(
+                this,
+                mensaje,
+                "Resumen del Catálogo",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(
+                this,
+                "Error al generar el resumen: " + e.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+} 
