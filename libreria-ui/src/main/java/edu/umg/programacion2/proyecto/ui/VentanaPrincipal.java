@@ -1,6 +1,7 @@
 package edu.umg.programacion2.proyecto.ui;
 
 import edu.umg.programacion2.proyecto.dao.LibroDAO;
+
 import edu.umg.programacion2.proyecto.modelo.Libro;
 
 import javax.swing.*;
@@ -11,6 +12,8 @@ import java.util.List;
 import javax.swing.RowFilter;
 import javax.swing.table.TableRowSorter;
 import javax.swing.RowFilter;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -23,10 +26,9 @@ public class VentanaPrincipal extends JFrame {
     private JTextField txtPrecio;
     private JTextField txtExistencias;
     private JTextField txtAnioPublicacion;
-
+    private JTextField txtFechaIngreso;
     private JTable tablaLibros;
     private DefaultTableModel tableModel;
-
     private JButton btnGuardar;
     private JButton btnActualizar;
     private JButton btnEliminar;
@@ -54,7 +56,9 @@ public class VentanaPrincipal extends JFrame {
         txtPrecio = new JTextField();
         txtExistencias = new JTextField();
         txtAnioPublicacion = new JTextField();
-
+        txtFechaIngreso= new JTextField(); 
+        txtFechaIngreso.setText(LocalDate.now().toString()); 
+        
         // 2. Panel de Formulario (4 filas x 4 columnas)
         JPanel pnlFormulario = new JPanel(new GridLayout(4, 4, 10, 10));
         pnlFormulario.setBorder(BorderFactory.createTitledBorder("Datos del Libro"));
@@ -80,11 +84,13 @@ public class VentanaPrincipal extends JFrame {
         // Fila 4: Año Publicación y Relleno
         pnlFormulario.add(new JLabel("Año Publicación (*):"));
         pnlFormulario.add(txtAnioPublicacion);
-        pnlFormulario.add(new JLabel("")); // Relleno
-        pnlFormulario.add(new JLabel("")); // Relleno
-
+        pnlFormulario.add(new JLabel("")); 
+        pnlFormulario.add(new JLabel("")); 
+        pnlFormulario.add(new JLabel("Fecha Ingreso (AAAA-MM-DD):")); 
+        pnlFormulario.add(txtFechaIngreso); 
+        
         // 3. Tabla de Libros y Estilos Visuales
-        String[] columnas = {"ID", "Título", "Autor", "Categoría", "Precio (Q)", "Existencias", "Año"};
+        String[] columnas = {"ID", "Título", "Autor", "Categoría", "Precio (Q)", "Existencias", "Año", "Fecha Ingreso"};
         tableModel = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -199,11 +205,14 @@ public class VentanaPrincipal extends JFrame {
                         l.getCategoria(),
                         String.format("%.2f", l.getPrecio()),
                         l.getExistencias(),
-                        l.getAnioPublicacion()
+                        l.getAnioPublicacion(),
+                        l.getFechaIngreso() != null ? l.getFechaIngreso().toString() : "" 
+             
                 };
                 tableModel.addRow(fila);
             }
         } catch (Exception e) {
+        	e.printStackTrace();
             JOptionPane.showMessageDialog(this,
                     "Ocurrió un error al cargar la lista de libros.",
                     "Error de Conexión",
@@ -221,9 +230,11 @@ public class VentanaPrincipal extends JFrame {
             double precio = Double.parseDouble(txtPrecio.getText().trim());
             int existencias = Integer.parseInt(txtExistencias.getText().trim());
             int anio = Integer.parseInt(txtAnioPublicacion.getText().trim());
+            LocalDate fechaIngreso = LocalDate.parse(txtFechaIngreso.getText().trim()); // 👈 Nueva línea
 
-            Libro nuevo = new Libro(titulo, autor, categoria, precio, existencias, anio);
+            Libro nuevo = new Libro(titulo, autor, categoria, precio, existencias, anio, fechaIngreso);
             libroDAO.crear(nuevo);
+           
 
             JOptionPane.showMessageDialog(this, "Libro registrado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             cargarDatosTabla();
@@ -252,10 +263,11 @@ public class VentanaPrincipal extends JFrame {
             double precio = Double.parseDouble(txtPrecio.getText().trim());
             int existencias = Integer.parseInt(txtExistencias.getText().trim());
             int anio = Integer.parseInt(txtAnioPublicacion.getText().trim());
+            LocalDate fechaIngreso = LocalDate.parse(txtFechaIngreso.getText().trim()); // 👈 Nueva línea
 
-            Libro libro = new Libro(id, titulo, autor, categoria, precio, existencias, anio);
+            Libro libro = new Libro(id, titulo, autor, categoria, precio, existencias, anio, fechaIngreso);
             boolean exito = libroDAO.actualizar(libro);
-
+            
             if (exito) {
                 JOptionPane.showMessageDialog(this, "Libro actualizado correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 cargarDatosTabla();
@@ -309,6 +321,12 @@ public class VentanaPrincipal extends JFrame {
     private boolean validarEntradas() {
         if (txtTitulo.getText().trim().isEmpty() || txtAutor.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "El Título y el Autor son obligatorios.", "Validación de Datos", JOptionPane.WARNING_MESSAGE);
+            try {
+                LocalDate.parse(txtFechaIngreso.getText().trim());
+            } catch (DateTimeParseException e) {
+                JOptionPane.showMessageDialog(this, "La fecha de ingreso debe tener el formato AAAA-MM-DD (ej. 2026-03-29).", "Validación", JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
             return false;
         }
 
@@ -352,6 +370,7 @@ public class VentanaPrincipal extends JFrame {
     private void seleccionarFila() {
         int filaVista = tablaLibros.getSelectedRow();
         if (filaVista >= 0) {
+        	
             // Convierte el índice de la vista al índice real del modelo
             int fila = tablaLibros.convertRowIndexToModel(filaVista);
 
@@ -362,6 +381,10 @@ public class VentanaPrincipal extends JFrame {
             txtPrecio.setText(tableModel.getValueAt(fila, 4).toString().replace(",", "."));
             txtExistencias.setText(tableModel.getValueAt(fila, 5).toString());
             txtAnioPublicacion.setText(tableModel.getValueAt(fila, 6).toString());
+         
+            // Carga la fecha si existe en la columna 7
+            Object fechaVal = tableModel.getValueAt(fila, 7);
+            txtFechaIngreso.setText(fechaVal != null ? fechaVal.toString() : LocalDate.now().toString());
         }
     }
 
@@ -373,6 +396,8 @@ public class VentanaPrincipal extends JFrame {
         txtPrecio.setText("");
         txtExistencias.setText("");
         txtAnioPublicacion.setText("");
+        tablaLibros.clearSelection();
+        txtFechaIngreso.setText(LocalDate.now().toString());
         tablaLibros.clearSelection();
     }
 }

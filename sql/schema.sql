@@ -29,3 +29,5 @@ INSERT INTO libros (titulo, autor, categoria, precio, existencias, anio_publicac
 ('Cien años de soledad', 'Gabriel Garcia Marquez', 'Novela', 145.00, 12, 1967),
 ('Clean Code', 'Robert C. Martin', 'Tecnico', 220.50, 5, 2008),
 ('El principito', 'Antoine de Saint-Exupéry', 'Infantil', 85.00, 0, 1943);
+
+ALTER TABLE libros ADD COLUMN fecha_ingreso DATE;

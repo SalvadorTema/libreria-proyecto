@@ -1,4 +1,5 @@
 package edu.umg.programacion2.proyecto.modelo;
+import java.time.LocalDate;
 
 public class Libro {
     private int id;
@@ -8,11 +9,12 @@ public class Libro {
     private double precio;
     private int existencias;
     private int anioPublicacion;
+    private LocalDate fechaIngreso;
 
     public Libro() {
     }
 
-    public Libro(int id, String titulo, String autor, String categoria, double precio, int existencias, int anioPublicacion) {
+    public Libro(int id, String titulo, String autor, String categoria, double precio, int existencias, int anioPublicacion, LocalDate fechaIngreso) {
         this.id = id;
         this.titulo = titulo;
         this.autor = autor;
@@ -20,15 +22,17 @@ public class Libro {
         this.precio = precio;
         this.existencias = existencias;
         this.anioPublicacion = anioPublicacion;
+        this.fechaIngreso = fechaIngreso;
     }
 
-    public Libro(String titulo, String autor, String categoria, double precio, int existencias, int anioPublicacion) {
+    public Libro(String titulo, String autor, String categoria, double precio, int existencias, int anioPublicacion,LocalDate fechaIngreso) {
         this.titulo = titulo;
         this.autor = autor;
         this.categoria = categoria;
         this.precio = precio;
         this.existencias = existencias;
         this.anioPublicacion = anioPublicacion;
+        this.fechaIngreso = fechaIngreso;
     }
 
     // Getters y Setters
@@ -52,4 +56,13 @@ public class Libro {
 
     public int getAnioPublicacion() { return anioPublicacion; }
     public void setAnioPublicacion(int anioPublicacion) { this.anioPublicacion = anioPublicacion; }
+    
+    public LocalDate getFechaIngreso() {
+        return fechaIngreso;
+    }
+
+    public void setFechaIngreso(LocalDate fechaIngreso) {
+        this.fechaIngreso = fechaIngreso;
+    }
+    
 }

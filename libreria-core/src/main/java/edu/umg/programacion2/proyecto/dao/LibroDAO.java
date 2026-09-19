@@ -20,7 +20,9 @@ public class LibroDAO {
             ps.setDouble(4, libro.getPrecio());
             ps.setInt(5, libro.getExistencias());
             ps.setInt(6, libro.getAnioPublicacion());
-            
+            ps.setInt(6, libro.getAnioPublicacion());
+            ps.setDate(7, libro.getFechaIngreso() != null ? java.sql.Date.valueOf(libro.getFechaIngreso()) : java.sql.Date.valueOf(java.time.LocalDate.now()));
+            ps.setInt(8, libro.getId());
             ps.executeUpdate();
 
             try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -34,12 +36,15 @@ public class LibroDAO {
 
     public List<Libro> listarTodos() throws SQLException {
         List<Libro> lista = new ArrayList<>();
-        String sql = "SELECT id, titulo, autor, categoria, precio, existencias, anio_publicacion FROM libros ORDER BY id DESC";
+        String sql = "SELECT id, titulo, autor, categoria, precio, existencias, anio_publicacion, fecha_ingreso FROM libros ORDER BY id DESC";
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
         	while (rs.next()) {
+        	    java.sql.Date fechaSql = rs.getDate("fecha_ingreso");
+        	    java.time.LocalDate fechaIngreso = (fechaSql != null) ? fechaSql.toLocalDate() : java.time.LocalDate.now();
+
         	    Libro libro = new Libro(
         	            rs.getInt("id"),
         	            rs.getString("titulo"),
@@ -47,7 +52,8 @@ public class LibroDAO {
         	            rs.getString("categoria"),
         	            rs.getDouble("precio"),
         	            rs.getInt("existencias"),
-        	            rs.getInt("anio_publicacion")
+        	            rs.getInt("anio_publicacion"),
+        	            fechaIngreso
         	    );
         	    lista.add(libro);
         	}
@@ -57,13 +63,16 @@ public class LibroDAO {
     }
 
     public Optional<Libro> buscarPorId(int id) throws SQLException {
-        String sql = "SELECT id, titulo, autor, categoria, precio, existencias, anio_publicacion FROM libros WHERE id = ?";
+        String sql = "SELECT id, titulo, autor, categoria, precio, existencias, anio_publicacion,fecha_ingreso FROM libros WHERE id = ?";
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
+                	java.sql.Date fechaSql = rs.getDate("fecha_ingreso");
+                    java.time.LocalDate fechaIngreso = (fechaSql != null) ? fechaSql.toLocalDate() : java.time.LocalDate.now();
+                    
                     Libro libro = new Libro(
                             rs.getInt("id"),
                             rs.getString("titulo"),
@@ -71,7 +80,8 @@ public class LibroDAO {
                             rs.getString("categoria"),
                             rs.getDouble("precio"),
                             rs.getInt("existencias"),
-                            rs.getInt("anio_publicacion")
+                            rs.getInt("anio_publicacion"),
+                            fechaIngreso
                     );
                     return Optional.of(libro);
                 }
